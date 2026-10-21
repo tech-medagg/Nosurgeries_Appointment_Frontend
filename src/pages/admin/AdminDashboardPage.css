@@ -1,0 +1,116 @@
+/* Approved Reference Design Color System */
+:root {
+  --dentivo-bg: #EEF5F8;
+  --dentivo-card-bg: #FFFFFF;
+  --dentivo-cyan-main: #2EBBD9;
+  --dentivo-cyan-bright: #38C8E6;
+  --dentivo-cyan-soft: #DDF4F8;
+  --dentivo-cyan-bar-idle: #C7F2F7;
+  --dentivo-dark-teal: #045E6A;
+  --dentivo-text-dark: #111827;
+  --dentivo-text-muted: #6B7280;
+  --dentivo-text-light: #9CA3AF;
+  --dentivo-border: #E2EDF2;
+  --dentivo-shadow: 0 6px 20px rgba(46, 187, 217, 0.05);
+}
+
+.admin-dashboard-container {
+  background-color: var(--dentivo-bg);
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--dentivo-text-dark);
+}
+
+/* Card Styling */
+.dashboard-card {
+  background: #FFFFFF !important;
+  border-radius: 20px !important;
+  border: 1px solid #E2EDF2 !important;
+  box-shadow: 0 6px 20px rgba(46, 187, 217, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 10px 28px rgba(46, 187, 217, 0.10) !important;
+}
+
+/* Active Sidebar Pill */
+.sidebar-item-active {
+  background-color: #98ECF8 !important;
+  color: #0A3F4C !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+}
+
+/* Cyan Button Overrides (Bypasses MUI global purple theme) */
+.dentivo-btn-cyan {
+  background-color: #2EBBD9 !important;
+  background: #2EBBD9 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(46, 187, 217, 0.3) !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+}
+
+.dentivo-btn-cyan:hover {
+  background-color: #25A7C2 !important;
+  background: #25A7C2 !important;
+  box-shadow: 0 6px 16px rgba(46, 187, 217, 0.4) !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 10px;
+}
+
+/* Pulse Badge */
+.pulse-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 9px;
+  height: 9px;
+  background-color: #EF4444;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+
+/* Floating Header Design & Animation */
+@keyframes floatHeader {
+  0% {
+    transform: translateY(0px);
+    box-shadow: 0 10px 30px -5px rgba(46, 187, 217, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+  50% {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px -5px rgba(46, 187, 217, 0.18), 0 8px 25px rgba(0, 0, 0, 0.06);
+  }
+  100% {
+    transform: translateY(0px);
+    box-shadow: 0 10px 30px -5px rgba(46, 187, 217, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.floating-header-bar {
+  background: #FFFFFF !important;
+  border-radius: 24px !important;
+  border: 1px solid #E2EDF2 !important;
+  box-shadow: 0 10px 30px -5px rgba(46, 187, 217, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  animation: floatHeader 6s ease-in-out infinite !important;
+  transition: all 0.3s ease !important;
+}
+
+.floating-header-bar:hover {
+  animation-play-state: paused !important;
+  transform: translateY(-8px) scale(1.002) !important;
+  box-shadow: 0 20px 45px -5px rgba(46, 187, 217, 0.22), 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
