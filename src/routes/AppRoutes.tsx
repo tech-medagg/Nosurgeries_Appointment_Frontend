@@ -11,6 +11,9 @@ import VerifyCodePage from "../pages/auth/VerifyCodePage";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
+import SumiAdminLoginPage from "../pages/admin-auth/SumiAdminLoginPage";
+import SumiAdminRegisterPage from "../pages/admin-auth/SumiAdminRegisterPage";
+
 import PatientLayout from "../layouts/PatientLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import DoctorLayout from "../layouts/DoctorLayout";
@@ -68,6 +71,24 @@ const AppRoutes = () => {
       <Route
         path="/register"
         element={<RegisterPage />}
+      />
+
+      {/* ================================
+          SUMI-ADMIN DEDICATED ROUTES
+      ================================= */}
+      <Route
+        path="/sumi-admin"
+        element={<Navigate to="/sumi-admin/login" replace />}
+      />
+
+      <Route
+        path="/sumi-admin/login"
+        element={<SumiAdminLoginPage />}
+      />
+
+      <Route
+        path="/sumi-admin/register"
+        element={<SumiAdminRegisterPage />}
       />
 
       <Route
