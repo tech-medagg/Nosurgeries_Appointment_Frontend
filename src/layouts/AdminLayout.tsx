@@ -25,9 +25,7 @@ import {
   Calendar as CalendarIcon,
   Users,
   ClipboardList,
-  Receipt,
   BarChart3,
-  Boxes,
   UserCheck,
   Search,
   Settings,
@@ -79,8 +77,8 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: "notif-3",
-    title: "Credit Pool Refill Confirmed",
-    description: "1,000 appointment credits have been added to your clinic account balance.",
+    title: "System Schedule Update Confirmed",
+    description: "Clinic operational hours and doctor appointment rosters updated successfully.",
     timeAgo: "1 day ago",
     date: "Jun 14, 2026",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
@@ -140,9 +138,7 @@ const AdminLayout: React.FC = () => {
     { label: "Calendar", icon: <CalendarIcon size={20} />, path: "/admin/calendar" },
     { label: "Patients", icon: <Users size={20} />, path: "/admin/patients" },
     { label: "Treatment Plans", icon: <ClipboardList size={20} />, path: "/admin/treatment-plans" },
-    { label: "Credit Usage", icon: <Receipt size={20} />, path: "/admin/credits" },
     { label: "Analytics & Reports", icon: <BarChart3 size={20} />, path: "/admin/analytics" },
-    { label: "Inventory Management", icon: <Boxes size={20} />, path: "/admin/inventory" },
     { label: "Staff Management", icon: <UserCheck size={20} />, path: "/admin/staff" },
   ];
 
@@ -339,8 +335,6 @@ const AdminLayout: React.FC = () => {
                   ? "Help Centre"
                   : location.pathname.startsWith("/admin/staff")
                   ? "Staff Management"
-                  : location.pathname.startsWith("/admin/credits") || location.pathname.startsWith("/admin/billing")
-                  ? "Credit Usage"
                   : location.pathname.startsWith("/admin/patients")
                   ? "Patients"
                   : location.pathname.startsWith("/admin/treatment-plans")
@@ -360,8 +354,6 @@ const AdminLayout: React.FC = () => {
                   ? "Help & Knowledge Base"
                   : location.pathname.startsWith("/admin/staff")
                   ? "Practitioners & Duty Schedule"
-                  : location.pathname.startsWith("/admin/credits") || location.pathname.startsWith("/admin/billing")
-                  ? "Overview & Credit Consumption"
                   : location.pathname.startsWith("/admin/patients")
                   ? "Records & History"
                   : location.pathname.startsWith("/admin/treatment-plans")

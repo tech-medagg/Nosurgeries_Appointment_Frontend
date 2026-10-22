@@ -54,7 +54,7 @@ const AdminDashboardPage: React.FC = () => {
   // Sample Reports List from approved reference design
   const reportsList: ReportItem[] = [
     { id: "1", title: "Critical Condition", timeAgo: "6 min ago", date: "July 15, 2026" },
-    { id: "2", title: "Billing App Freeze", timeAgo: "10 min ago", date: "July 15, 2026" },
+    { id: "2", title: "Staff Schedule Review", timeAgo: "10 min ago", date: "July 15, 2026" },
     { id: "3", title: "Room 105 Light", timeAgo: "15 min ago", date: "July 15, 2026" },
     { id: "4", title: "Broken IV Stand", timeAgo: "1 days ago", date: "July 15, 2026" },
     { id: "5", title: "Lab Printer Error", timeAgo: "5 min ago", date: "July 15, 2026" },
@@ -137,7 +137,7 @@ const AdminDashboardPage: React.FC = () => {
       badgeCount: 8,
       dateStr: "Tuesday, 14 July, 2026",
       title: "Monthly Reports",
-      description: "Analyze clinical performance, credit usage, and overall clinic occupancy rates.",
+      description: "Analyze clinical performance, patient volume, and overall clinic occupancy rates.",
       priority: "Medium",
       avatars: [
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
@@ -151,7 +151,7 @@ const AdminDashboardPage: React.FC = () => {
       badgeCount: 15,
       dateStr: "Tuesday, 14 July, 2026",
       title: "Team Meeting",
-      description: "Review recently completed appointments, credit usage, and prescriptions.",
+      description: "Review recently completed appointments, clinical outcomes, and prescriptions.",
       priority: "High",
       avatars: [
         "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80",
@@ -349,7 +349,7 @@ const AdminDashboardPage: React.FC = () => {
             </Box>
 
             <Typography variant="caption" sx={{ color: "#6B7280", display: "block", mb: 2 }}>
-              Standard rate: <span style={{ color: "#2EBBD9", fontWeight: 700 }}>10 Credits</span>/session
+              Standard session: <span style={{ color: "#2EBBD9", fontWeight: 700 }}>30 Mins</span> / consultation
             </Typography>
 
             {/* Date Selection Carousel */}

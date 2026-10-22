@@ -34,7 +34,6 @@ import AdminPatientsPage from "../pages/admin/AdminPatientsPage";
 import AdminTreatmentPlansPage from "../pages/admin/AdminTreatmentPlansPage";
 import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage";
 import AdminStaffPage from "../pages/admin/AdminStaffPage";
-import AdminCreditsPage from "../pages/admin/AdminCreditsPage";
 import AdminProfilePage from "../pages/admin/AdminProfilePage";
 import AdminHelpCenterPage from "../pages/admin/AdminHelpCenterPage";
 
@@ -271,11 +270,11 @@ const AppRoutes = () => {
             />
             <Route
               path="credits"
-              element={<AdminCreditsPage />}
+              element={<Navigate to="/admin" replace />}
             />
             <Route
               path="billing"
-              element={<AdminCreditsPage />}
+              element={<Navigate to="/admin" replace />}
             />
             <Route
               path="profile"

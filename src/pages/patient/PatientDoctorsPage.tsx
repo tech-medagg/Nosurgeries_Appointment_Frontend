@@ -287,19 +287,6 @@ const PatientDoctorsPage = () => {
                   years
                 </Typography>
 
-                {doctor.consultationFee !=
-                  null && (
-                  <Typography
-                    sx={{
-                      mt: 2,
-                      fontWeight: 600,
-                    }}
-                  >
-                    Consultation Rate:{" "}
-                    {doctor.consultationFee ?? 10}{" "}
-                    Credits
-                  </Typography>
-                )}
 
                 <Button
                   variant="contained"

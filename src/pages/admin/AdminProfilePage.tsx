@@ -11,7 +11,7 @@ import {
   FormControl,
   InputAdornment,
 } from "@mui/material";
-import { Edit3, Coins } from "lucide-react";
+import { Edit3, ShieldCheck } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const AdminProfilePage: React.FC = () => {
@@ -132,7 +132,7 @@ const AdminProfilePage: React.FC = () => {
             }}
           />
 
-          {/* Credit Usage Summary */}
+          {/* Admin Status Summary */}
           <Box
             sx={{
               width: "100%",
@@ -146,13 +146,13 @@ const AdminProfilePage: React.FC = () => {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Coins size={18} color="#00ADC6" />
+              <ShieldCheck size={18} color="#00ADC6" />
               <Typography variant="caption" sx={{ fontWeight: 700, color: "#045E6A" }}>
-                Credit Pool
+                Admin Status
               </Typography>
             </Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#2EBBD9" }}>
-              12,450 Credits
+              Active &amp; Verified
             </Typography>
           </Box>
         </Paper>

@@ -8,7 +8,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import { ChevronDown, Coins, HelpCircle } from "lucide-react";
+import { ChevronDown, ShieldCheck, HelpCircle } from "lucide-react";
 
 export interface FAQItem {
   id: string;
@@ -69,16 +69,16 @@ const FAQ_DATA: FAQItem[] = [
   },
   {
     id: "faq-7",
-    question: "How do I manage my credit plan?",
+    question: "How do I manage doctor schedules and duty rosters?",
     answer: [
-      "Go to Credit Usage in the sidebar menu to view total credit consumption, allocation rates per doctor, and monthly transaction logs.",
+      "Go to Staff Management or Calendar in the sidebar menu to view duty schedules, configure consultation slots, and assign doctor shifts.",
     ],
   },
   {
     id: "faq-8",
-    question: "How can I track my credit usage?",
+    question: "How can I track patient appointments and requests?",
     answer: [
-      "Navigate to 'Credit Usage' from the left sidebar. You can view total credits consumed, credit rates per doctor consultation, and detailed transaction records.",
+      "Navigate to 'Appointments' from the left sidebar. You can view all incoming booking requests, approve or reassign appointments, and filter by status.",
     ],
   },
   {
@@ -177,13 +177,13 @@ const AdminHelpCenterPage: React.FC = () => {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Coins size={18} color="#00ADC6" />
+              <ShieldCheck size={18} color="#00ADC6" />
               <Typography variant="caption" sx={{ fontWeight: 700, color: "#045E6A" }}>
-                Credit Pool
+                Admin Status
               </Typography>
             </Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#2EBBD9" }}>
-              12,450 Credits
+              Active &amp; Verified
             </Typography>
           </Box>
         </Paper>

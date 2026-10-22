@@ -219,7 +219,7 @@ const AdminAnalyticsPage: React.FC = () => {
                 16%
               </Typography>
               <Typography variant="caption" sx={{ color: "#6B7280", fontWeight: 600, fontSize: "0.78rem" }}>
-                Credit Usage Growth
+                Consultation Growth
               </Typography>
             </Box>
           </Box>
@@ -315,13 +315,13 @@ const AdminAnalyticsPage: React.FC = () => {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
                   <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: COLOR_CYAN }} />
                   <Typography variant="caption" sx={{ color: "#6B7280", fontWeight: 600 }}>
-                    Credits Used
+                    Consultations Completed
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
                   <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#045E6A" }} />
                   <Typography variant="caption" sx={{ color: "#6B7280", fontWeight: 600 }}>
-                    Allocated: 165
+                    Target: 165
                   </Typography>
                 </Box>
               </Box>
@@ -359,7 +359,7 @@ const AdminAnalyticsPage: React.FC = () => {
           </Box>
 
           <Typography variant="caption" sx={{ color: "#6B7280", display: "block", mb: 2 }}>
-            Last week credit usage increased by{" "}
+            Last week consultation volume increased by{" "}
             <Box component="span" sx={{ color: COLOR_CYAN, fontWeight: 700 }}>
               13%
             </Box>
@@ -433,7 +433,7 @@ const AdminAnalyticsPage: React.FC = () => {
           {/* Card Header */}
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: "#111827", fontSize: "1.1rem" }}>
-              Credit Usage by Treatment
+              Consultation Volume by Treatment
             </Typography>
             <IconButton size="small" sx={{ color: "#94A3B8" }}>
               <MoreHorizontal size={18} />
@@ -443,10 +443,10 @@ const AdminAnalyticsPage: React.FC = () => {
           {/* Clean Progress Breakdown List (Fixes Clipping & Overlap) */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, my: "auto" }}>
             {[
-              { name: "Implants & Surgeries", pct: 100, credits: "4,000", color: "#005C6E" },
-              { name: "Root Canal & Filings", pct: 70, credits: "2,800", color: "#0091A8" },
-              { name: "Orthodontics", pct: 56, credits: "2,240", color: "#20C9E3" },
-              { name: "General Consultation & Cleaning", pct: 40, credits: "1,600", color: "#00ADC6" },
+              { name: "Implants & Surgeries", pct: 100, credits: "400", color: "#005C6E" },
+              { name: "Root Canal & Filings", pct: 70, credits: "280", color: "#0091A8" },
+              { name: "Orthodontics", pct: 56, credits: "224", color: "#20C9E3" },
+              { name: "General Consultation & Cleaning", pct: 40, credits: "160", color: "#00ADC6" },
             ].map((item) => (
               <Box key={item.name}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.6 }}>
@@ -458,7 +458,7 @@ const AdminAnalyticsPage: React.FC = () => {
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 600, fontSize: "0.75rem" }}>
-                      {item.credits} Credits
+                      {item.credits} Sessions
                     </Typography>
                     <Typography
                       variant="caption"
@@ -778,7 +778,7 @@ const AdminAnalyticsPage: React.FC = () => {
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    Credits Used
+                    Consultations
                     <ArrowUpDown size={14} opacity={0.8} />
                   </Box>
                 </TableCell>
@@ -847,9 +847,9 @@ const AdminAnalyticsPage: React.FC = () => {
                       {doc.hoursWorked}
                     </TableCell>
 
-                    {/* Credits Used */}
+                    {/* Consultations */}
                     <TableCell sx={{ fontWeight: 700, color: "#1F2937", fontSize: "0.92rem" }}>
-                      {doc.creditsUsed.toLocaleString()} Credits
+                      {doc.creditsUsed.toLocaleString()} Sessions
                     </TableCell>
 
                     {/* Ratings */}

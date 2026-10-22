@@ -33,7 +33,6 @@ import {
   Star,
   Users,
   CalendarCheck,
-  Coins,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -890,13 +889,13 @@ const AdminStaffPage: React.FC = () => {
                     />
                   </Box>
 
-                  {/* Credit Usage Rate */}
+                  {/* Consultation Slot */}
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1, borderTop: "1px dashed #E2EDF2" }}>
                     <Typography variant="body2" sx={{ color: "#045E6A", fontWeight: 700, display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Coins size={16} /> Credit Usage Rate
+                      <Clock size={16} /> Consultation Slot
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#2EBBD9", fontWeight: 800 }}>
-                      {selectedDoctor.creditsRate} Credits / Session
+                      30 Mins / Patient
                     </Typography>
                   </Box>
                 </Box>
@@ -1408,24 +1407,6 @@ const AdminStaffPage: React.FC = () => {
               value={newDocData.phone}
               onChange={(e) => setNewDocData({ ...newDocData, phone: e.target.value })}
               placeholder="(+2) 012 345 678"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "#FFFFFF",
-                  backgroundColor: "#1D2739",
-                  borderRadius: "12px",
-                  "& fieldset": { borderColor: "#334155" },
-                  "&:hover fieldset": { borderColor: "#2EBBD9" },
-                  "&.Mui-focused fieldset": { borderColor: "#2EBBD9" },
-                },
-                "& .MuiInputLabel-root": { color: "#2EBBD9", fontWeight: 600 },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#2EBBD9" },
-              }}
-            />
-            <TextField
-              label="Credit Usage Rate"
-              type="number"
-              value={newDocData.creditsRate}
-              onChange={(e) => setNewDocData({ ...newDocData, creditsRate: Number(e.target.value) })}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   color: "#FFFFFF",
