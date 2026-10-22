@@ -57,9 +57,18 @@ export interface MeResponse {
   success: boolean;
   data: {
     userId: string;
+    id?: string;
     roleId: string;
     roleName: string;
     email: string;
+    fullName?: string;
+    mobile?: string;
+    status?: string;
+    isEmailVerified?: boolean;
+    isMobileVerified?: boolean;
+    lastLogin?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
   };
 }
 

@@ -124,7 +124,7 @@ const AdminAnalyticsPage: React.FC = () => {
   const [sortField, setSortField] = useState<keyof DoctorPerformance>("patients");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const userName = user?.email ? user.email.split("@")[0] : "Robert";
+  const userName = user?.fullName || (user?.email ? user.email.split("@")[0] : "Admin");
 
   // Handle Table Sort
   const handleSort = (field: keyof DoctorPerformance) => {

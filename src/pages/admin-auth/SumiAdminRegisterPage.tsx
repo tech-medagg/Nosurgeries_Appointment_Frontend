@@ -179,6 +179,13 @@ export default function SumiAdminRegisterPage() {
       });
 
       if (res.success) {
+        const registeredAdmin = {
+          fullName: values.fullName.trim(),
+          email: values.email.trim().toLowerCase(),
+          mobile: cleanMobile,
+        };
+        localStorage.setItem("admin_registered_details", JSON.stringify(registeredAdmin));
+        localStorage.setItem("last_registered_admin", JSON.stringify(registeredAdmin));
         setSuccess(true);
         setTimeout(() => navigate("/sumi-admin/login"), 2000);
       } else {

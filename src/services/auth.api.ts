@@ -35,6 +35,19 @@ export const getMeApi = async (): Promise<MeResponse> => {
   return response.data;
 };
 
+export const updateMeApi = async (payload: {
+  fullName?: string;
+  mobile?: string;
+  email?: string;
+}) => {
+  const response = await api.put<{
+    success: boolean;
+    message: string;
+    data?: any;
+  }>("/auth/me", payload);
+  return response.data;
+};
+
 /* ── Forgot / Reset Password ─────────────────────────── */
 
 export const forgotPasswordApi = async (email: string) => {

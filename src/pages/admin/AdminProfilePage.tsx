@@ -1,40 +1,221 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
   Paper,
   Button,
   TextField,
-  Chip,
   MenuItem,
   Select,
   FormControl,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
-import { Edit3, ShieldCheck } from "lucide-react";
+import { Edit3, ShieldCheck, CheckCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { updateMeApi } from "../../services/auth.api";
 
 const AdminProfilePage: React.FC = () => {
-  const { user } = useAuth();
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const { user, updateUser } = useAuth();
 
-  // Profile Form State
-  const [formData, setFormData] = useState({
-    contactName: "Robert Wilson",
-    phoneNumber: "147852369",
-    email: user?.email || "drrobert@exaple.com",
-    streetNumber: "100000000214",
-    doorNumber: "963",
-    city: "New York",
-    state: "NY",
+  // Consistent Storage Keys for Admin Profile
+  const userKey = user?.email || user?.id || "admin";
+  const userProfileKey = `admin_profile_data_${userKey}`;
+  const genericProfileKey = "admin_profile_data_global";
+
+  // Helper to retrieve saved extra profile information (address, avatar)
+  const loadSavedData = useMemo(() => {
+    return () => {
+      try {
+        const stored =
+          localStorage.getItem(userProfileKey) ||
+          localStorage.getItem(genericProfileKey);
+        if (!stored) return null;
+        const parsed = JSON.parse(stored);
+        // Discard any obsolete mock values
+        if (parsed.streetNumber === "100000000214") parsed.streetNumber = "";
+        if (parsed.doorNumber === "963") parsed.doorNumber = "";
+        if (parsed.city === "New York" && parsed.state === "NY") {
+          parsed.city = "";
+          parsed.state = "";
+        }
+        return parsed;
+      } catch {
+        return null;
+      }
+    };
+  }, [userProfileKey]);
+
+  // Read previously cached registration details as fallback
+  const cachedAdminReg = useMemo(() => {
+    try {
+      const stored =
+        localStorage.getItem("admin_registered_details") ||
+        localStorage.getItem("last_registered_admin") ||
+        localStorage.getItem("authUser");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const initialSaved = loadSavedData();
+
+  const [profileImage, setProfileImage] = useState<string | null>(
+    initialSaved?.profileImage || null
+  );
+
+  // Dynamic Profile Form State
+  const [formData, setFormData] = useState(() => {
+    return {
+      contactName: user?.fullName || cachedAdminReg?.fullName || initialSaved?.contactName || "",
+      phoneNumber: user?.mobile || cachedAdminReg?.mobile || initialSaved?.phoneNumber || "",
+      email: user?.email || cachedAdminReg?.email || initialSaved?.email || "",
+      streetNumber: initialSaved?.streetNumber || "",
+      doorNumber: initialSaved?.doorNumber || "",
+      city: initialSaved?.city || "",
+      state: initialSaved?.state || "",
+    };
   });
 
+  const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  const handleSave = () => {
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+  // Keep form data synchronized when user context updates (e.g. after login / session restore)
+  useEffect(() => {
+    const saved = loadSavedData();
+    if (saved?.profileImage && !profileImage) {
+      setProfileImage(saved.profileImage);
+    }
+
+    setFormData((prev) => {
+      // Always prefer live user context for name / email; only fall back for optional address fields
+      const currentName = user?.fullName || cachedAdminReg?.fullName || saved?.contactName || prev.contactName;
+      const currentMobile = user?.mobile || cachedAdminReg?.mobile || saved?.phoneNumber || prev.phoneNumber;
+      const currentEmail = user?.email || cachedAdminReg?.email || saved?.email || prev.email;
+
+      return {
+        contactName: currentName || "",
+        phoneNumber: currentMobile || "",
+        email: currentEmail || "",
+        streetNumber: prev.streetNumber || saved?.streetNumber || "",
+        doorNumber: prev.doorNumber || saved?.doorNumber || "",
+        city: prev.city || saved?.city || "",
+        state: prev.state || saved?.state || "",
+      };
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError("");
+    setSavedSuccess(false);
+
+    const savedName    = formData.contactName.trim();
+    const savedMobile  = formData.phoneNumber.trim();
+    const savedEmail   = formData.email.trim();
+    const savedStreet  = formData.streetNumber.trim();
+    const savedDoor    = formData.doorNumber.trim();
+    const savedCity    = formData.city;
+    const savedState   = formData.state.trim();
+
+    try {
+      // 1. Persist updated info to backend
+      try {
+        await updateMeApi({
+          fullName: savedName || undefined,
+          mobile:   savedMobile || undefined,
+          email:    savedEmail || undefined,
+        });
+      } catch (apiErr: any) {
+        console.warn("Backend profile sync notice:", apiErr);
+      }
+
+      // 2. Update global AuthContext user so name/email reflects everywhere instantly
+      updateUser({
+        fullName: savedName || user?.fullName || "",
+        mobile:   savedMobile,
+        email:    savedEmail || user?.email || "",
+      });
+
+      // 3. Persist registration info cache
+      const updatedReg = {
+        fullName: savedName,
+        mobile:   savedMobile,
+        email:    savedEmail,
+      };
+      localStorage.setItem("admin_registered_details", JSON.stringify(updatedReg));
+      localStorage.setItem("last_registered_admin",    JSON.stringify(updatedReg));
+
+      // 4. Persist full profile info (contact + address + photo) to localStorage
+      const fullProfilePayload = {
+        contactName:  savedName,
+        phoneNumber:  savedMobile,
+        email:        savedEmail,
+        streetNumber: savedStreet,
+        doorNumber:   savedDoor,
+        city:         savedCity,
+        state:        savedState,
+        profileImage,
+      };
+
+      localStorage.setItem(userProfileKey,    JSON.stringify(fullProfilePayload));
+      localStorage.setItem(genericProfileKey, JSON.stringify(fullProfilePayload));
+
+      // 5. Sync form to exactly what was saved
+      setFormData({
+        contactName:  savedName,
+        phoneNumber:  savedMobile,
+        email:        savedEmail,
+        streetNumber: savedStreet,
+        doorNumber:   savedDoor,
+        city:         savedCity,
+        state:        savedState,
+      });
+
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4000);
+    } catch (err: any) {
+      setSaveError(err?.message || "Failed to save profile changes.");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleCancel = () => {
+    const saved = loadSavedData();
+    setFormData({
+      contactName: user?.fullName || cachedAdminReg?.fullName || saved?.contactName || "",
+      phoneNumber: user?.mobile || cachedAdminReg?.mobile || saved?.phoneNumber || "",
+      email: user?.email || cachedAdminReg?.email || saved?.email || "",
+      streetNumber: saved?.streetNumber || "",
+      doorNumber: saved?.doorNumber || "",
+      city: saved?.city || "",
+      state: saved?.state || "",
+    });
+    setSaveError("");
+    setSavedSuccess(false);
+  };
+
+  const displayName = formData.contactName || user?.fullName || cachedAdminReg?.fullName || "Administrator";
+
+  // Role display: "Admin" if admin, "Doctor" if doctor, etc.
+  const formatRole = (role?: string) => {
+    if (!role) return "Admin";
+    const upper = role.toUpperCase();
+    if (upper === "ADMIN" || upper === "SUPER_ADMIN") return "Admin";
+    if (upper === "DOCTOR") return "Doctor";
+    if (upper === "PATIENT") return "Patient";
+    return role
+      .toLowerCase()
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
+  const displayRole = formatRole(user?.roleName);
 
   return (
     <Box sx={{ width: "100%", pb: 4 }}>
@@ -44,7 +225,7 @@ const AdminProfilePage: React.FC = () => {
           Personal Information
         </Typography>
         <Typography variant="body2" sx={{ color: "#6B7280", fontWeight: 500, mt: 0.5 }}>
-          Personal & Contact Info
+          Personal &amp; Contact Info
         </Typography>
       </Box>
 
@@ -76,12 +257,46 @@ const AdminProfilePage: React.FC = () => {
               position: "relative",
             }}
           >
-            <Box
-              component="img"
-              src={profileImage || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80"}
-              alt="Admin Profile"
-              sx={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-            />
+            {/* Profile Photo or Initials Fallback */}
+            {profileImage ? (
+              <Box
+                component="img"
+                src={profileImage}
+                alt="Admin Profile"
+                sx={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#045E6A",
+                  borderRadius: "20px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: "5rem",
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    lineHeight: 1,
+                    userSelect: "none",
+                    letterSpacing: "-2px",
+                  }}
+                >
+                  {(formData.contactName || user?.fullName || "A")
+                    .trim()
+                    .split(/\s+/)
+                    .map((w: string) => w[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </Typography>
+              </Box>
+            )}
             <Button
               component="label"
               size="small"
@@ -100,37 +315,42 @@ const AdminProfilePage: React.FC = () => {
               }}
             >
               📷 Upload Photo
-              <input type="file" accept="image/*" hidden onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => setProfileImage(reader.result as string);
-                  reader.readAsDataURL(file);
-                }
-              }} />
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      const result = reader.result as string;
+                      setProfileImage(result);
+                      try {
+                        const current = loadSavedData() || {};
+                        const updated = { ...current, profileImage: result };
+                        localStorage.setItem(userProfileKey, JSON.stringify(updated));
+                        localStorage.setItem(genericProfileKey, JSON.stringify(updated));
+                        // Notify AdminLayout (and other listeners) to refresh avatar
+                        window.dispatchEvent(new Event("profileImageUpdated"));
+                      } catch {
+                        // ignore
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
             </Button>
           </Box>
 
           <Typography variant="h5" sx={{ fontWeight: 800, color: "#111827", mb: 0.5 }}>
-            Dr. Robert Wilson
+            {displayName}
           </Typography>
 
-          <Typography variant="caption" sx={{ color: "#6B7280", fontWeight: 600, fontSize: "0.82rem", mb: 1.5, display: "block" }}>
-            General Dentist & Practice Manager
+          <Typography variant="subtitle2" sx={{ color: "#6B7280", fontWeight: 700, fontSize: "0.95rem", mb: 2 }}>
+            {displayRole}
           </Typography>
-
-          <Chip
-            label="#DR-0123456"
-            size="small"
-            sx={{
-              backgroundColor: "#2EBBD9",
-              color: "#FFFFFF",
-              fontWeight: 800,
-              fontSize: "0.75rem",
-              borderRadius: "8px",
-              mb: 2,
-            }}
-          />
 
           {/* Admin Status Summary */}
           <Box
@@ -148,7 +368,7 @@ const AdminProfilePage: React.FC = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <ShieldCheck size={18} color="#00ADC6" />
               <Typography variant="caption" sx={{ fontWeight: 700, color: "#045E6A" }}>
-                Admin Status
+                Status
               </Typography>
             </Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#2EBBD9" }}>
@@ -174,7 +394,7 @@ const AdminProfilePage: React.FC = () => {
             Personal Information
           </Typography>
 
-          {/* Contact Name */}
+          {/* Contact Name (Synced from Registration) */}
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 600, color: "#374151", mb: 0.8 }}>
               Contact name
@@ -182,6 +402,7 @@ const AdminProfilePage: React.FC = () => {
             <TextField
               fullWidth
               value={formData.contactName}
+              placeholder="Administrator Full Name"
               onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
               slotProps={{
                 input: {
@@ -203,7 +424,7 @@ const AdminProfilePage: React.FC = () => {
             />
           </Box>
 
-          {/* Phone Number */}
+          {/* Phone Number (Synced from Registration) */}
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 600, color: "#374151", mb: 0.8 }}>
               Phone number
@@ -211,6 +432,7 @@ const AdminProfilePage: React.FC = () => {
             <TextField
               fullWidth
               value={formData.phoneNumber}
+              placeholder="Admin Mobile Number"
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               slotProps={{
                 input: {
@@ -232,7 +454,7 @@ const AdminProfilePage: React.FC = () => {
             />
           </Box>
 
-          {/* Email */}
+          {/* Email (Synced from Registration) */}
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 600, color: "#374151", mb: 0.8 }}>
               Email
@@ -240,6 +462,7 @@ const AdminProfilePage: React.FC = () => {
             <TextField
               fullWidth
               value={formData.email}
+              placeholder="Admin Email Address"
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               slotProps={{
                 input: {
@@ -269,6 +492,7 @@ const AdminProfilePage: React.FC = () => {
               </Typography>
               <TextField
                 fullWidth
+                placeholder="Street address (Optional)"
                 value={formData.streetNumber}
                 onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
                 slotProps={{
@@ -291,6 +515,7 @@ const AdminProfilePage: React.FC = () => {
               </Typography>
               <TextField
                 fullWidth
+                placeholder="Door / Suite / Flat (Optional)"
                 value={formData.doorNumber}
                 onChange={(e) => setFormData({ ...formData, doorNumber: e.target.value })}
                 slotProps={{
@@ -316,6 +541,7 @@ const AdminProfilePage: React.FC = () => {
               </Typography>
               <FormControl fullWidth>
                 <Select
+                  displayEmpty
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   sx={{
@@ -323,9 +549,18 @@ const AdminProfilePage: React.FC = () => {
                     backgroundColor: "#E6F8FA",
                     "& fieldset": { borderColor: "transparent" },
                     fontWeight: 600,
-                    color: "#111827",
+                    color: formData.city ? "#111827" : "#9CA3AF",
                   }}
                 >
+                  <MenuItem value="">
+                    <em>Select City (Optional)</em>
+                  </MenuItem>
+                  <MenuItem value="Chennai">Chennai</MenuItem>
+                  <MenuItem value="Bangalore">Bangalore</MenuItem>
+                  <MenuItem value="Mumbai">Mumbai</MenuItem>
+                  <MenuItem value="Delhi">Delhi</MenuItem>
+                  <MenuItem value="Hyderabad">Hyderabad</MenuItem>
+                  <MenuItem value="Kolkata">Kolkata</MenuItem>
                   <MenuItem value="New York">New York</MenuItem>
                   <MenuItem value="Los Angeles">Los Angeles</MenuItem>
                   <MenuItem value="Chicago">Chicago</MenuItem>
@@ -340,6 +575,7 @@ const AdminProfilePage: React.FC = () => {
               </Typography>
               <TextField
                 fullWidth
+                placeholder="State / Province (Optional)"
                 value={formData.state}
                 onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                 slotProps={{
@@ -358,10 +594,11 @@ const AdminProfilePage: React.FC = () => {
           </Box>
 
           {/* Save & Cancel Buttons */}
-          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, mt: 2, alignItems: "center" }}>
             <Button
               variant="contained"
               onClick={handleSave}
+              disabled={isSaving}
               sx={{
                 backgroundColor: "#045E6A",
                 color: "#FFFFFF",
@@ -375,11 +612,13 @@ const AdminProfilePage: React.FC = () => {
                 "&:hover": { backgroundColor: "#034953" },
               }}
             >
-              Save Changes
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : "Save Changes"}
             </Button>
 
             <Button
               variant="contained"
+              onClick={handleCancel}
+              disabled={isSaving}
               sx={{
                 backgroundColor: "#68B2BD",
                 color: "#FFFFFF",
@@ -397,8 +636,17 @@ const AdminProfilePage: React.FC = () => {
           </Box>
 
           {savedSuccess && (
-            <Typography variant="caption" sx={{ color: "#16A34A", fontWeight: 700 }}>
-              ✓ Personal information saved successfully!
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#16A34A" }}>
+              <CheckCircle size={18} />
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                Personal information saved successfully!
+              </Typography>
+            </Box>
+          )}
+
+          {saveError && (
+            <Typography variant="caption" sx={{ color: "#EF4444", fontWeight: 700 }}>
+              {saveError}
             </Typography>
           )}
         </Paper>

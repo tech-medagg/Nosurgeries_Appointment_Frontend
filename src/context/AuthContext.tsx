@@ -33,6 +33,10 @@ interface AuthContextValue {
     user: AuthUser
   ) => void;
 
+  updateUser: (
+    partial: Partial<AuthUser>
+  ) => void;
+
   logout: () => void;
 }
 
@@ -51,11 +55,22 @@ const AUTH_USER_KEY = "authUser";
 export const AuthProvider = ({
   children,
 }: AuthProviderProps) => {
-  const [user, setUser] =
-    useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    try {
+      const stored = localStorage.getItem(AUTH_USER_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const [accessToken, setAccessToken] =
-    useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(ACCESS_TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  });
 
   const [isLoading, setIsLoading] =
     useState(true);
@@ -71,6 +86,15 @@ export const AuthProvider = ({
 
     setAccessToken(null);
     setUser(null);
+  }, []);
+
+  const updateUser = useCallback((partialUser: Partial<AuthUser>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...partialUser };
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const login = useCallback(
@@ -175,12 +199,34 @@ export const AuthProvider = ({
           const me =
             response.data;
 
+          let cachedUser: Partial<AuthUser> = {};
+          try {
+            const raw = localStorage.getItem(AUTH_USER_KEY);
+            if (raw) cachedUser = JSON.parse(raw);
+          } catch {
+            // ignore
+          }
+
           const normalizedUser: AuthUser =
             {
-              id: me.userId,
-              roleId: me.roleId,
-              roleName: me.roleName,
-              email: me.email,
+              ...cachedUser,
+              id: me.userId || me.id || cachedUser.id || "",
+              roleId: me.roleId || cachedUser.roleId || "",
+              roleName: me.roleName || cachedUser.roleName || "",
+              email: me.email || cachedUser.email || "",
+              fullName: me.fullName || cachedUser.fullName || "",
+              mobile: me.mobile || cachedUser.mobile || "",
+              status: me.status || cachedUser.status,
+              isEmailVerified:
+                me.isEmailVerified ?? cachedUser.isEmailVerified,
+              isMobileVerified:
+                me.isMobileVerified ?? cachedUser.isMobileVerified,
+              lastLogin:
+                me.lastLogin || cachedUser.lastLogin,
+              createdAt:
+                me.createdAt || cachedUser.createdAt,
+              updatedAt:
+                me.updatedAt || cachedUser.updatedAt,
             };
 
           localStorage.setItem(
@@ -213,6 +259,7 @@ export const AuthProvider = ({
       isLoading,
       login,
       setAuthSession,
+      updateUser,
       logout,
     }),
     [
@@ -221,6 +268,7 @@ export const AuthProvider = ({
       isLoading,
       login,
       setAuthSession,
+      updateUser,
       logout,
     ]
   );

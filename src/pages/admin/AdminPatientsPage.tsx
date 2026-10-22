@@ -270,7 +270,7 @@ const AdminPatientsPage: React.FC = () => {
   });
 
   // Calculate First Name for greeting
-  const userName = user?.email ? user.email.split("@")[0] : "Robert";
+  const userName = user?.fullName || (user?.email ? user.email.split("@")[0] : "Admin");
 
   // Handle Sort Toggle
   const handleSort = (field: keyof PatientRecord) => {

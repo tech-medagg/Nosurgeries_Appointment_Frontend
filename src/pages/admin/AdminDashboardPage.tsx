@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
   ChevronRight,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import "./AdminDashboardPage.css";
 
 // Interface for Report Items
@@ -48,6 +49,7 @@ interface TaskItem {
 }
 
 const AdminDashboardPage: React.FC = () => {
+  const { user } = useAuth();
   // Active Date Filter in Doctor Schedule
   const [selectedDateDay, setSelectedDateDay] = useState(14);
 
@@ -166,7 +168,7 @@ const AdminDashboardPage: React.FC = () => {
       {/* Welcome Greeting Headline */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h3" sx={{ fontWeight: 800, color: "#111827", fontSize: { xs: "1.8rem", sm: "2.4rem" } }}>
-          Welcome back, <span style={{ color: "#2EBBD9" }}>Robert</span>
+          Welcome back, <span style={{ color: "#2EBBD9" }}>{user?.fullName ? user.fullName.split(" ")[0] : (user?.email ? user.email.split("@")[0] : "Admin")}</span>
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5, color: "#6B7280" }}>
           <CalendarIcon size={16} />

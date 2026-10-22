@@ -3,12 +3,12 @@ import {
   Box,
   Typography,
   Paper,
-  Chip,
   Accordion,
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
 import { ChevronDown, ShieldCheck, HelpCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export interface FAQItem {
   id: string;
@@ -91,11 +91,64 @@ const FAQ_DATA: FAQItem[] = [
 ];
 
 const AdminHelpCenterPage: React.FC = () => {
+  const { user } = useAuth();
   const [expandedId, setExpandedId] = useState<string | false>("faq-3"); // FAQ 3 expanded by default matching Image 3
 
   const handleChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpandedId(isExpanded ? panel : false);
   };
+
+  const formatRole = (role?: string) => {
+    if (!role) return "Admin";
+    const upper = role.toUpperCase();
+    if (upper === "ADMIN" || upper === "SUPER_ADMIN") return "Admin";
+    if (upper === "DOCTOR") return "Doctor";
+    if (upper === "PATIENT") return "Patient";
+    return role
+      .toLowerCase()
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
+  const displayName = user?.fullName || (user?.email ? user.email.split("@")[0] : "Administrator");
+  const displayRole = formatRole(user?.roleName);
+
+  // Read saved profile image from localStorage (set by AdminProfilePage)
+  // Reactive profile image — updates when a photo is uploaded from AdminProfilePage
+  const readProfileImage = React.useCallback(() => {
+    try {
+      const userKey = user?.email || user?.id || "admin";
+      const raw =
+        localStorage.getItem(`admin_profile_data_${userKey}`) ||
+        localStorage.getItem("admin_profile_data_global");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { profileImage?: string }).profileImage || null;
+    } catch {
+      return null;
+    }
+  }, [user?.email, user?.id]);
+
+  const [profilePhotoSrc, setProfilePhotoSrc] = React.useState<string | null>(() => {
+    try {
+      const raw = localStorage.getItem("admin_profile_data_global");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { profileImage?: string }).profileImage || null;
+    } catch {
+      return null;
+    }
+  });
+
+  React.useEffect(() => {
+    setProfilePhotoSrc(readProfileImage());
+    const handler = () => setProfilePhotoSrc(readProfileImage());
+    window.addEventListener("profileImageUpdated", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("profileImageUpdated", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, [readProfileImage]);
 
   return (
     <Box sx={{ width: "100%", pb: 4 }}>
@@ -133,36 +186,57 @@ const AdminHelpCenterPage: React.FC = () => {
               overflow: "hidden",
               backgroundColor: "#E2EDF2",
               mb: 2,
+              position: "relative",
             }}
           >
-            <Box
-              component="img"
-              src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80"
-              alt="Dr. Robert Wilson"
-              sx={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-            />
+            {profilePhotoSrc ? (
+              <Box
+                component="img"
+                src={profilePhotoSrc}
+                alt={displayName}
+                sx={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#045E6A",
+                  borderRadius: "20px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: "5rem",
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    lineHeight: 1,
+                    userSelect: "none",
+                    letterSpacing: "-2px",
+                  }}
+                >
+                  {displayName
+                    .trim()
+                    .split(/\s+/)
+                    .map((w: string) => w[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           <Typography variant="h5" sx={{ fontWeight: 800, color: "#111827", mb: 0.5 }}>
-            Dr. Robert Wilson
+            {displayName}
           </Typography>
 
-          <Typography variant="caption" sx={{ color: "#6B7280", fontWeight: 600, fontSize: "0.82rem", mb: 1.5, display: "block" }}>
-            General Dentist & Practice Manager
+          <Typography variant="subtitle2" sx={{ color: "#6B7280", fontWeight: 700, fontSize: "0.95rem", mb: 2 }}>
+            {displayRole}
           </Typography>
-
-          <Chip
-            label="#DR-0123456"
-            size="small"
-            sx={{
-              backgroundColor: "#2EBBD9",
-              color: "#FFFFFF",
-              fontWeight: 800,
-              fontSize: "0.75rem",
-              borderRadius: "8px",
-              mb: 2,
-            }}
-          />
 
           <Box
             sx={{

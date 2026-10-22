@@ -331,7 +331,7 @@ const MOCK_FEEDBACK: DoctorFeedback[] = [
 
 const AdminStaffPage: React.FC = () => {
   const { user } = useAuth();
-  const userName = user?.email ? user.email.split("@")[0] : "Robert";
+  const userName = user?.fullName || (user?.email ? user.email.split("@")[0] : "Admin");
 
   // State Management
   const [doctorsList, setDoctorsList] = useState<StaffDoctor[]>(MOCK_STAFF_DOCTORS);

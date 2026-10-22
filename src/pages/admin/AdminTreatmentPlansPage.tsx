@@ -396,7 +396,7 @@ const AdminTreatmentPlansPage: React.FC = () => {
     notes: "",
   });
 
-  const userName = user?.email ? user.email.split("@")[0] : "Robert";
+  const userName = user?.fullName || (user?.email ? user.email.split("@")[0] : "Admin");
 
   // Calculate Header Quick Stats
   const activeCount = useMemo(() => plans.filter((p) => p.status === "Active").length, [plans]);

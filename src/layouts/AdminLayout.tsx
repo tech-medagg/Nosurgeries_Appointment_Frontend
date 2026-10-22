@@ -93,6 +93,58 @@ const AdminLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
+  // Helper to read saved profile image from localStorage
+  const readProfileImage = React.useCallback(() => {
+    try {
+      const userKey = user?.email || user?.id || "admin";
+      const raw =
+        localStorage.getItem(`admin_profile_data_${userKey}`) ||
+        localStorage.getItem("admin_profile_data_global");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { profileImage?: string }).profileImage || null;
+    } catch {
+      return null;
+    }
+  }, [user?.email, user?.id]);
+
+  // Reactive profile image — updates when photo is uploaded in AdminProfilePage
+  const [layoutProfileImage, setLayoutProfileImage] = React.useState<string | null>(() => {
+    try {
+      const userKey = "admin"; // initial read before user loads
+      const raw =
+        localStorage.getItem(`admin_profile_data_${userKey}`) ||
+        localStorage.getItem("admin_profile_data_global");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { profileImage?: string }).profileImage || null;
+    } catch {
+      return null;
+    }
+  });
+
+  React.useEffect(() => {
+    // Re-read whenever user loads
+    setLayoutProfileImage(readProfileImage());
+
+    // Listen for photo upload events from AdminProfilePage
+    const handleProfileImageUpdate = () => setLayoutProfileImage(readProfileImage());
+    window.addEventListener("profileImageUpdated", handleProfileImageUpdate);
+    window.addEventListener("storage", handleProfileImageUpdate);
+
+    return () => {
+      window.removeEventListener("profileImageUpdated", handleProfileImageUpdate);
+      window.removeEventListener("storage", handleProfileImageUpdate);
+    };
+  }, [readProfileImage]);
+
+  // Initials from user's full name (e.g. "Sumitha" → "S", "John Doe" → "JD")
+  const userInitials = React.useMemo(() => {
+    const name = user?.fullName || user?.email || "";
+    if (!name) return "A";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
+  }, [user?.fullName, user?.email]);
+
   // Drawer state for mobile screens
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -422,10 +474,20 @@ const AdminLayout: React.FC = () => {
                 sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", pl: 0.5 }}
               >
                 <Avatar
-                  src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80"
-                  alt={user?.email || "Admin User"}
-                  sx={{ width: 40, height: 40, border: "2px solid #2EBBD9" }}
-                />
+                  src={layoutProfileImage || undefined}
+                  alt={user?.fullName || user?.email || "Admin"}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    border: "2px solid #2EBBD9",
+                    backgroundColor: layoutProfileImage ? undefined : "#045E6A",
+                    color: "#FFFFFF",
+                    fontWeight: 800,
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {!layoutProfileImage && userInitials}
+                </Avatar>
                 <IconButton size="small" sx={{ color: "#6B7280", p: 0.2 }}>
                   <ChevronDown size={16} />
                 </IconButton>
@@ -646,16 +708,35 @@ const AdminLayout: React.FC = () => {
           {/* User Header Box (Bright White Name & Light Cyan Email) */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 1, mb: 1 }}>
             <Avatar
-              src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80"
-              alt="Robert"
-              sx={{ width: 44, height: 44, border: "2px solid #2EBBD9" }}
-            />
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#FFFFFF", fontSize: "0.98rem", lineHeight: 1.1 }}>
-                Robert
+              src={layoutProfileImage || undefined}
+              alt={user?.fullName || "Admin"}
+              sx={{
+                width: 44,
+                height: 44,
+                flexShrink: 0,
+                border: "2px solid #2EBBD9",
+                backgroundColor: layoutProfileImage ? undefined : "#045E6A",
+                color: "#FFFFFF",
+                fontWeight: 800,
+                fontSize: "1rem",
+              }}
+            >
+              {!layoutProfileImage && userInitials}
+            </Avatar>
+            <Box sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+              <Typography
+                variant="subtitle2"
+                noWrap
+                sx={{ fontWeight: 800, color: "#FFFFFF", fontSize: "0.98rem", lineHeight: 1.2 }}
+              >
+                {user?.fullName || (user?.email ? user.email.split("@")[0] : "Admin")}
               </Typography>
-              <Typography variant="caption" sx={{ color: "#98ECF8", fontSize: "0.78rem", fontWeight: 500 }}>
-                drrobert@gmail.com
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ color: "#98ECF8", fontSize: "0.75rem", fontWeight: 500, display: "block" }}
+              >
+                {user?.email || ""}
               </Typography>
             </Box>
           </Box>
