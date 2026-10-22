@@ -77,11 +77,11 @@ const AppRoutes = () => {
       ================================= */}
       <Route
         path="/sumi-admin"
-        element={<Navigate to="/sumi-admin/login" replace />}
+        element={<Navigate to="/admin/login" replace />}
       />
 
       <Route
-        path="/sumi-admin/login"
+        path="/admin/login"
         element={<SumiAdminLoginPage />}
       />
 

@@ -187,7 +187,7 @@ export default function SumiAdminRegisterPage() {
         localStorage.setItem("admin_registered_details", JSON.stringify(registeredAdmin));
         localStorage.setItem("last_registered_admin", JSON.stringify(registeredAdmin));
         setSuccess(true);
-        setTimeout(() => navigate("/sumi-admin/login"), 2000);
+        setTimeout(() => navigate("/admin/login"), 2000);
       } else {
         setServerError(res.message || "Admin registration failed.");
       }
@@ -439,7 +439,7 @@ export default function SumiAdminRegisterPage() {
                 <div style={{ marginTop: 18, textAlign: "center", width: "100%" }}>
                   <p style={s.footNote}>
                     Already have an admin account?{" "}
-                    <span style={s.footLink} onClick={() => navigate("/sumi-admin/login")}>
+                    <span style={s.footLink} onClick={() => navigate("/admin/login")}>
                       Sign In
                     </span>
                   </p>
