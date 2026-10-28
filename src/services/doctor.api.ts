@@ -58,14 +58,22 @@ export const getMyDoctorProfileApi =
     message?: string;
     data: Doctor;
   }> => {
-    const response =
-      await api.get<{
-        success: boolean;
-        message?: string;
-        data: Doctor;
-      }>("/doctors/me");
+    try {
+      const response =
+        await api.get<{
+          success: boolean;
+          message?: string;
+          data: Doctor;
+        }>("/doctors/me");
 
-    return response.data;
+      return response.data;
+    } catch (error: any) {
+      // If server returns 404/no-profile, treat as success:false
+      // so React Query does not enter the error state.
+      const serverData = error?.response?.data;
+      if (serverData) return serverData;
+      throw error;
+    }
   };
 
 export const updateDoctorApi = async (

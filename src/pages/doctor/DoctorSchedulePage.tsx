@@ -25,6 +25,7 @@ import {
   Grow,
 } from "@mui/material";
 import type { TransitionProps } from "@mui/material/transitions";
+import { useNavigate } from "react-router-dom";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupIcon from "@mui/icons-material/Group";
@@ -84,6 +85,7 @@ const getDayOfWeekFromDate = (dateStr: string): DayOfWeek => {
 
 const DoctorSchedulePage: React.FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const todayStr = getTodayString();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -114,12 +116,13 @@ const DoctorSchedulePage: React.FC = () => {
     severity: "success",
   });
 
-  const { data: profileData, isLoading: profileLoading } = useQuery({
+  const { data: profileData, isLoading: profileLoading, isError: profileError } = useQuery({
     queryKey: ["doctor", "me"],
     queryFn: getMyDoctorProfileApi,
+    retry: 1,
   });
 
-  const doctorProfile = profileData?.data;
+  const doctorProfile = profileData?.data ?? null;
 
   const { data: scheduleData, isLoading: scheduleLoading } = useQuery({
     queryKey: ["doctor", "schedule", doctorProfile?.id],
@@ -133,6 +136,89 @@ const DoctorSchedulePage: React.FC = () => {
   );
 
   const isLoading = profileLoading || scheduleLoading;
+
+  // ── Profile not found or query errored ──────────────────────────────
+  if (!profileLoading && (profileError || !doctorProfile)) {
+    return (
+      <Box sx={{ pb: 4 }}>
+        <Card
+          sx={{
+            backgroundColor: "#FFFFFF",
+            border: "1px solid #FEE2E2",
+            borderRadius: "20px",
+            boxShadow: "0 10px 30px -5px rgba(239,68,68,0.08)",
+            mt: 2,
+          }}
+        >
+          <CardContent sx={{ py: 8, textAlign: "center" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                backgroundColor: "#FEF2F2",
+                color: "#EF4444",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2.5,
+              }}
+            >
+              <EventNoteIcon sx={{ fontSize: 32 }} />
+            </Box>
+            <Typography variant="h6" sx={{ color: "#111827", fontWeight: 800, mb: 1 }}>
+              Doctor Profile Not Found
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "#6B7280", maxWidth: 480, mx: "auto", mb: 3.5, lineHeight: 1.6 }}
+            >
+              Your doctor profile has not been set up yet. You need a complete doctor profile before
+              you can manage your schedule. Please go to{" "}
+              <strong>My Profile</strong> and fill in your details, or ask an administrator to create
+              your profile.
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
+              <Button
+                variant="contained"
+                onClick={() => navigate("/doctor/profile")}
+                sx={{
+                  backgroundColor: "#045E6A",
+                  color: "#FFFFFF",
+                  borderRadius: "12px",
+                  fontWeight: 700,
+                  px: 3.5,
+                  py: 1.1,
+                  textTransform: "none",
+                  boxShadow: "0 4px 14px rgba(4,94,106,0.25)",
+                  "&:hover": { backgroundColor: "#034953" },
+                }}
+              >
+                Go to My Profile
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => queryClient.invalidateQueries({ queryKey: ["doctor", "me"] })}
+                sx={{
+                  borderColor: "#2EBBD9",
+                  color: "#045E6A",
+                  borderRadius: "12px",
+                  fontWeight: 700,
+                  px: 3.5,
+                  py: 1.1,
+                  textTransform: "none",
+                  "&:hover": { backgroundColor: "#DDF4F8" },
+                }}
+              >
+                Retry
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
 
   const saveMutation = useMutation({
     mutationFn: async (data: CreateDoctorSchedulePayload) => {
